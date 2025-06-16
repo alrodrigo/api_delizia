@@ -45,11 +45,16 @@ export default function handler(req, res) {
 
   if (req.method === 'GET') {
     const { url } = req;
-    const urlParts = url.split('/');
-    const agenciaId = urlParts[urlParts.length - 1];
+    
+    // Parsear URL y query parameters
+    const urlObj = new URL(url, 'https://dummy.com');
+    const pathParts = urlObj.pathname.split('/');
+    const agenciaId = pathParts[pathParts.length - 1];
+
+    console.log('Agencias endpoint - URL:', url);
 
     // Si hay un ID específico
-    if (agenciaId && agenciaId !== 'agencias') {
+    if (agenciaId && agenciaId !== 'agencias' && !agenciaId.includes('?')) {
       const agencia = agenciasMock.find(a => a._id === agenciaId);
       if (!agencia) {
         return res.status(404).json({ message: 'Agencia no encontrada' });

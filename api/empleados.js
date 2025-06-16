@@ -71,11 +71,22 @@ export default function handler(req, res) {
 
   if (req.method === 'GET') {
     const { url } = req;
-    const urlParts = url.split('/');
-    const empleadoId = urlParts[urlParts.length - 1];
+    
+    // Parsear URL y query parameters
+    const urlObj = new URL(url, 'https://dummy.com');
+    const pathParts = urlObj.pathname.split('/');
+    const empleadoId = pathParts[pathParts.length - 1];
+    
+    // Obtener query parameters
+    const agenciaFilter = urlObj.searchParams.get('agencia');
+    const page = urlObj.searchParams.get('page');
+    const limit = urlObj.searchParams.get('limit');
+
+    console.log('Empleados endpoint - URL:', url);
+    console.log('Empleados endpoint - Query params:', { agenciaFilter, page, limit });
 
     // Si hay un ID específico
-    if (empleadoId && empleadoId !== 'empleados') {
+    if (empleadoId && empleadoId !== 'empleados' && !empleadoId.includes('?')) {
       const empleado = empleadosMock.find(e => e._id === empleadoId);
       if (!empleado) {
         return res.status(404).json({ message: 'Empleado no encontrado' });
@@ -84,11 +95,10 @@ export default function handler(req, res) {
     }
 
     // Filtrar por agencia si se especifica
-    const { query } = req;
     let empleadosFiltrados = empleadosMock;
     
-    if (query && query.agencia) {
-      empleadosFiltrados = empleadosMock.filter(e => e.agencia._id === query.agencia);
+    if (agenciaFilter) {
+      empleadosFiltrados = empleadosMock.filter(e => e.agencia._id === agenciaFilter);
     }
 
     // Devolver todos los empleados con formato esperado
@@ -97,10 +107,10 @@ export default function handler(req, res) {
       count: empleadosFiltrados.length,
       data: empleadosFiltrados,
       pagination: {
-        currentPage: 1,
+        currentPage: parseInt(page) || 1,
         totalPages: 1,
         totalItems: empleadosFiltrados.length,
-        itemsPerPage: empleadosFiltrados.length
+        itemsPerPage: parseInt(limit) || empleadosFiltrados.length
       }
     });
   }

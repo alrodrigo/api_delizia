@@ -69,11 +69,21 @@ export default function handler(req, res) {
 
   if (req.method === 'GET') {
     const { url } = req;
-    const urlParts = url.split('/');
-    const desempenoId = urlParts[urlParts.length - 1];
+    
+    // Parsear URL y query parameters
+    const urlObj = new URL(url, 'https://dummy.com');
+    const pathParts = urlObj.pathname.split('/');
+    const desempenoId = pathParts[pathParts.length - 1];
+    
+    // Obtener query parameters
+    const empleadoFilter = urlObj.searchParams.get('empleado');
+    const periodoFilter = urlObj.searchParams.get('periodo');
+
+    console.log('Desempeños endpoint - URL:', url);
+    console.log('Desempeños endpoint - Query params:', { empleadoFilter, periodoFilter });
 
     // Si hay un ID específico
-    if (desempenoId && desempenoId !== 'desempenos') {
+    if (desempenoId && desempenoId !== 'desempenos' && !desempenoId.includes('?')) {
       const desempeno = desempenosMock.find(d => d._id === desempenoId);
       if (!desempeno) {
         return res.status(404).json({ message: 'Desempeño no encontrado' });
@@ -82,15 +92,14 @@ export default function handler(req, res) {
     }
 
     // Filtrar por empleado o período si se especifica
-    const { query } = req;
     let desempenosFiltrados = desempenosMock;
 
-    if (query && query.empleado) {
-      desempenosFiltrados = desempenosFiltrados.filter(d => d.empleado._id === query.empleado);
+    if (empleadoFilter) {
+      desempenosFiltrados = desempenosFiltrados.filter(d => d.empleado._id === empleadoFilter);
     }
 
-    if (query && query.periodo) {
-      desempenosFiltrados = desempenosFiltrados.filter(d => d.periodo === query.periodo);
+    if (periodoFilter) {
+      desempenosFiltrados = desempenosFiltrados.filter(d => d.periodo === periodoFilter);
     }
 
     return res.json({

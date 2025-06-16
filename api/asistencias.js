@@ -51,11 +51,21 @@ export default function handler(req, res) {
 
   if (req.method === 'GET') {
     const { url } = req;
-    const urlParts = url.split('/');
-    const asistenciaId = urlParts[urlParts.length - 1];
+    
+    // Parsear URL y query parameters
+    const urlObj = new URL(url, 'https://dummy.com');
+    const pathParts = urlObj.pathname.split('/');
+    const asistenciaId = pathParts[pathParts.length - 1];
+    
+    // Obtener query parameters
+    const empleadoFilter = urlObj.searchParams.get('empleado');
+    const fechaFilter = urlObj.searchParams.get('fecha');
+
+    console.log('Asistencias endpoint - URL:', url);
+    console.log('Asistencias endpoint - Query params:', { empleadoFilter, fechaFilter });
 
     // Si hay un ID específico
-    if (asistenciaId && asistenciaId !== 'asistencias') {
+    if (asistenciaId && asistenciaId !== 'asistencias' && !asistenciaId.includes('?')) {
       const asistencia = asistenciasMock.find(a => a._id === asistenciaId);
       if (!asistencia) {
         return res.status(404).json({ message: 'Asistencia no encontrada' });
@@ -64,15 +74,14 @@ export default function handler(req, res) {
     }
 
     // Filtrar por empleado o fecha si se especifica
-    const { query } = req;
     let asistenciasFiltradas = asistenciasMock;
 
-    if (query && query.empleado) {
-      asistenciasFiltradas = asistenciasFiltradas.filter(a => a.empleado._id === query.empleado);
+    if (empleadoFilter) {
+      asistenciasFiltradas = asistenciasFiltradas.filter(a => a.empleado._id === empleadoFilter);
     }
 
-    if (query && query.fecha) {
-      asistenciasFiltradas = asistenciasFiltradas.filter(a => a.fecha.startsWith(query.fecha));
+    if (fechaFilter) {
+      asistenciasFiltradas = asistenciasFiltradas.filter(a => a.fecha.startsWith(fechaFilter));
     }
 
     return res.json({

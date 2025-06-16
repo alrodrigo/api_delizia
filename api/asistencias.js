@@ -75,7 +75,17 @@ export default function handler(req, res) {
       asistenciasFiltradas = asistenciasFiltradas.filter(a => a.fecha.startsWith(query.fecha));
     }
 
-    return res.json(asistenciasFiltradas);
+    return res.json({
+      success: true,
+      count: asistenciasFiltradas.length,
+      data: asistenciasFiltradas,
+      pagination: {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: asistenciasFiltradas.length,
+        itemsPerPage: asistenciasFiltradas.length
+      }
+    });
   }
 
   if (req.method === 'POST') {

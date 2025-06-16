@@ -85,13 +85,24 @@ export default function handler(req, res) {
 
     // Filtrar por agencia si se especifica
     const { query } = req;
+    let empleadosFiltrados = empleadosMock;
+    
     if (query && query.agencia) {
-      const empleadosFiltrados = empleadosMock.filter(e => e.agencia._id === query.agencia);
-      return res.json(empleadosFiltrados);
+      empleadosFiltrados = empleadosMock.filter(e => e.agencia._id === query.agencia);
     }
 
-    // Devolver todos los empleados
-    return res.json(empleadosMock);
+    // Devolver todos los empleados con formato esperado
+    return res.json({
+      success: true,
+      count: empleadosFiltrados.length,
+      data: empleadosFiltrados,
+      pagination: {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: empleadosFiltrados.length,
+        itemsPerPage: empleadosFiltrados.length
+      }
+    });
   }
 
   if (req.method === 'POST') {

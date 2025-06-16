@@ -58,7 +58,17 @@ export default function handler(req, res) {
     }
 
     // Devolver todas las agencias
-    return res.json(agenciasMock);
+    return res.json({
+      success: true,
+      count: agenciasMock.length,
+      data: agenciasMock,
+      pagination: {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: agenciasMock.length,
+        itemsPerPage: agenciasMock.length
+      }
+    });
   }
 
   if (req.method === 'POST') {

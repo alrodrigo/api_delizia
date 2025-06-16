@@ -1,4 +1,4 @@
-// API ultra-simple para Delizia
+// Endpoint de login para compatibilidad con el frontend
 export default function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,22 +9,10 @@ export default function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Root endpoint
-  if (req.method === 'GET') {
-    return res.json({
-      message: 'API Delizia funcionando perfectamente',
-      timestamp: new Date().toISOString(),
-      version: '2.0.0',
-      status: 'online'
-    });
-  }
-
-  // Login endpoint
   if (req.method === 'POST') {
-    // Manejar tanto /api como /api/auth/login
     const { email, password } = req.body || {};
     
-    console.log('Login attempt:', email);
+    console.log('Login attempt on /auth/login:', email);
     
     // Login hardcoded para prueba
     if (email === 'admin@delizia.com' && password === 'admin123') {
@@ -46,9 +34,8 @@ export default function handler(req, res) {
     });
   }
 
-  return res.status(404).json({
-    error: 'Endpoint no encontrado',
-    method: req.method,
-    url: req.url
+  return res.status(405).json({
+    error: 'Método no permitido',
+    method: req.method
   });
 }

@@ -1,0 +1,17 @@
+{
+  "name": "api-delizia-simple",
+  "version": "1.0.0",
+  "description": "API simple para sistema Delizia",
+  "main": "api/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "node api/index.js"
+  },
+  "dependencies": {
+    "mongodb": "^6.3.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}

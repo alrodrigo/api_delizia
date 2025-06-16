@@ -1,5 +1,5 @@
 // Script para probar la API desplegada en Vercel
-const API_URL = 'https://api-delizia.vercel.app'; // URL de la API desplegada
+const API_URL = 'https://api-delizia.vercel.app/api'; // URL de la función API
 
 async function testAPI() {
   console.log('🧪 Probando API Delizia Simple...\n');

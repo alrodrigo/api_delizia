@@ -90,5 +90,58 @@ export default function handler(req, res) {
     });
   }
 
+  if (req.method === 'PUT') {
+    const { query, body } = req;
+    const empleadoId = query.id;
+
+    console.log('Actualizando empleado - ID:', empleadoId);
+    console.log('Datos recibidos:', body);
+
+    const empleadoIndex = empleadosMock.findIndex(e => e._id === empleadoId);
+    if (empleadoIndex === -1) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Empleado no encontrado' 
+      });
+    }
+
+    // Actualizar empleado (simulado)
+    const empleadoActualizado = {
+      ...empleadosMock[empleadoIndex],
+      ...body,
+      _id: empleadoId // Mantener el ID original
+    };
+
+    console.log('Empleado actualizado (simulado):', empleadoActualizado);
+
+    return res.json({
+      success: true,
+      message: 'Empleado actualizado correctamente',
+      data: empleadoActualizado
+    });
+  }
+
+  if (req.method === 'DELETE') {
+    const { query } = req;
+    const empleadoId = query.id;
+
+    console.log('Eliminando empleado - ID:', empleadoId);
+
+    const empleadoIndex = empleadosMock.findIndex(e => e._id === empleadoId);
+    if (empleadoIndex === -1) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Empleado no encontrado' 
+      });
+    }
+
+    console.log('Empleado eliminado (simulado)');
+
+    return res.json({
+      success: true,
+      message: 'Empleado eliminado correctamente'
+    });
+  }
+
   res.status(405).json({ error: 'Método no permitido' });
 }

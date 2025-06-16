@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Delizia - Test</title>
+</head>
+<body>
+    <h1>🍕 API Delizia Simple</h1>
+    <p>Si ves esta página, significa que Vercel está funcionando.</p>
+    <p>Ahora necesitamos que las funciones serverless funcionen.</p>
+    
+    <h2>Prueba de endpoints:</h2>
+    <div id="results"></div>
+    
+    <script>
+        async function testEndpoints() {
+            const results = document.getElementById('results');
+            
+            try {
+                // Test GET /api
+                const apiResponse = await fetch('/api');
+                const apiData = await apiResponse.json();
+                results.innerHTML += `<p>✅ GET /api: ${JSON.stringify(apiData)}</p>`;
+            } catch (error) {
+                results.innerHTML += `<p>❌ GET /api error: ${error}</p>`;
+            }
+            
+            try {
+                // Test POST login
+                const loginResponse = await fetch('/api', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'admin@delizia.com', password: 'admin123' })
+                });
+                const loginData = await loginResponse.json();
+                results.innerHTML += `<p>✅ POST /api (login): ${JSON.stringify(loginData)}</p>`;
+            } catch (error) {
+                results.innerHTML += `<p>❌ POST /api error: ${error}</p>`;
+            }
+        }
+        
+        // Ejecutar tests al cargar la página
+        testEndpoints();
+    </script>
+</body>
+</html>

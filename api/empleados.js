@@ -71,23 +71,25 @@ export default function handler(req, res) {
   ];
 
   if (req.method === 'GET') {
-    const { url } = req;
+    const { url, query } = req;
     
-    // Parsear URL y query parameters
-    const urlObj = new URL(url, 'https://dummy.com');
-    const pathParts = urlObj.pathname.split('/');
-    const empleadoId = pathParts[pathParts.length - 1];
+    console.log('Empleados endpoint - URL:', url);
+    console.log('Empleados endpoint - Query:', query);
+    
+    // Verificar si es una petición para empleado específico
+    // En Vercel, las rutas dinámicas como /empleados/[id] se manejan con query.id
+    const empleadoId = query.id;
     
     // Obtener query parameters
-    const agenciaFilter = urlObj.searchParams.get('agencia');
-    const page = urlObj.searchParams.get('page');
-    const limit = urlObj.searchParams.get('limit');
+    const agenciaFilter = query.agencia;
+    const page = query.page;
+    const limit = query.limit;
 
-    console.log('Empleados endpoint - URL:', url);
-    console.log('Empleados endpoint - Query params:', { agenciaFilter, page, limit });
+    console.log('Empleados endpoint - ID:', empleadoId);
+    console.log('Empleados endpoint - Params:', { agenciaFilter, page, limit });
 
     // Si hay un ID específico
-    if (empleadoId && empleadoId !== 'empleados' && !empleadoId.includes('?')) {
+    if (empleadoId) {
       const empleado = empleadosMock.find(e => e._id === empleadoId);
       if (!empleado) {
         return res.status(404).json({ message: 'Empleado no encontrado' });

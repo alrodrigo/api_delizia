@@ -130,25 +130,57 @@ export default function handler(req, res) {
   }
 
   if (req.method === 'PUT') {
-    const { url } = req;
-    const urlParts = url.split('/');
-    const empleadoId = urlParts[urlParts.length - 1];
+    const { query, body } = req;
+    const empleadoId = query.id;
+    
+    console.log('PUT Empleado - ID:', empleadoId);
+    console.log('PUT Empleado - Body:', body);
+    
+    if (!empleadoId) {
+      return res.status(400).json({ success: false, message: 'ID de empleado requerido' });
+    }
     
     const empleado = empleadosMock.find(e => e._id === empleadoId);
     if (!empleado) {
-      return res.status(404).json({ message: 'Empleado no encontrado' });
+      return res.status(404).json({ success: false, message: 'Empleado no encontrado' });
     }
 
-    const empleadoActualizado = { ...empleado, ...req.body };
-    return res.json(empleadoActualizado);
+    const empleadoActualizado = { 
+      ...empleado, 
+      ...body, 
+      _id: empleadoId // Mantener el ID original
+    };
+    
+    console.log('Empleado actualizado (simulado):', empleadoActualizado);
+    
+    return res.json({
+      success: true,
+      message: 'Empleado actualizado correctamente',
+      data: empleadoActualizado
+    });
   }
 
   if (req.method === 'DELETE') {
-    const { url } = req;
-    const urlParts = url.split('/');
-    const empleadoId = urlParts[urlParts.length - 1];
+    const { query } = req;
+    const empleadoId = query.id;
     
-    return res.json({ message: 'Empleado eliminado correctamente' });
+    console.log('DELETE Empleado - ID:', empleadoId);
+    
+    if (!empleadoId) {
+      return res.status(400).json({ success: false, message: 'ID de empleado requerido' });
+    }
+    
+    const empleado = empleadosMock.find(e => e._id === empleadoId);
+    if (!empleado) {
+      return res.status(404).json({ success: false, message: 'Empleado no encontrado' });
+    }
+    
+    console.log('Empleado eliminado (simulado)');
+    
+    return res.json({
+      success: true,
+      message: 'Empleado eliminado correctamente'
+    });
   }
 
   return res.status(405).json({ error: 'Método no permitido' });

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "API simple para sistema Delizia",
   "main": "api/index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js",
     "dev": "node index.js"

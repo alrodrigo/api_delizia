@@ -1,45 +1,7 @@
 // Endpoint para asistencias - MongoDB
-import mongoose from 'mongoose';
-
-// Configuración de conexión a MongoDB
-let isConnected = false;
-
-const connectDB = async () => {
-  if (isConnected) {
-    return;
-  }
-
-  try {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/delizia';
-    const finalUri = mongoUri.includes('/delizia') ? mongoUri : mongoUri.replace('/?', '/delizia?');
-    
-    console.log('🔍 Conectando a MongoDB desde asistencias...');
-    await mongoose.connect(finalUri);
-    isConnected = true;
-    console.log('✅ MongoDB conectado para asistencias');
-  } catch (error) {
-    console.error('❌ Error conectando MongoDB en asistencias:', error);
-    throw error;
-  }
-};
-
-// Esquema para asistencias
-const asistenciaSchema = new mongoose.Schema({
-  empleado: {
-    _id: String, 
-    nombre: String
-  },
-  fecha: { type: Date, required: true },
-  horaEntrada: String,
-  horaSalida: String,
-  estado: { type: String, enum: ['presente', 'ausente', 'tardanza'], default: 'presente' },
-  observaciones: String
-}, { timestamps: true });
-
-const Asistencia = mongoose.models.Asistencia || mongoose.model('Asistencia', asistenciaSchema);
+import { connectDB, Asistencia } from '../lib/mongodb.js';
 
 export default async function handler(req, res) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, Pragma');
@@ -50,17 +12,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('📅 Asistencias - Method:', req.method, 'Query:', req.query);
-    
-    // Conectar a MongoDB
     await connectDB();
-
     const { query, method, body } = req;
     const { id } = query;
 
+    console.log('📅 Asistencias - Method:', method, 'ID:', id);
+
     if (method === 'GET') {
       if (id) {
-        // Obtener asistencia específica
         const asistencia = await Asistencia.findById(id);
         if (!asistencia) {
           return res.status(404).json({ 
@@ -73,7 +32,6 @@ export default async function handler(req, res) {
           data: asistencia
         });
       } else {
-        // Obtener lista de asistencias
         const page = parseInt(query.page) || 1;
         const limit = parseInt(query.limit) || 10;
         const skip = (page - 1) * limit;
@@ -108,7 +66,6 @@ export default async function handler(req, res) {
     }
 
     if (method === 'POST') {
-      // Crear nueva asistencia
       const nuevaAsistencia = new Asistencia(body);
       const asistenciaGuardada = await nuevaAsistencia.save();
       
@@ -122,7 +79,6 @@ export default async function handler(req, res) {
     }
 
     if (method === 'PUT' && id) {
-      // Actualizar asistencia
       const asistenciaActualizada = await Asistencia.findByIdAndUpdate(
         id,
         body,
@@ -146,7 +102,6 @@ export default async function handler(req, res) {
     }
 
     if (method === 'DELETE' && id) {
-      // Eliminar asistencia
       const asistenciaEliminada = await Asistencia.findByIdAndDelete(id);
 
       if (!asistenciaEliminada) {
@@ -164,18 +119,14 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(405).json({ 
-      success: false,
-      error: 'Método no permitido' 
-    });
+    return res.status(405).json({ error: 'Método no permitido' });
 
   } catch (error) {
     console.error('❌ Error en asistencias:', error);
     return res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: error.message
     });
   }
 }

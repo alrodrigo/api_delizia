@@ -1,40 +1,5 @@
 // Endpoint para agencias - MongoDB
-import mongoose from 'mongoose';
-
-// Configuración de conexión a MongoDB
-let isConnected = false;
-
-const connectDB = async () => {
-  if (isConnected) {
-    return;
-  }
-
-  try {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/delizia';
-    const finalUri = mongoUri.includes('/delizia') ? mongoUri : mongoUri.replace('/?', '/delizia?');
-    
-    console.log('🔍 Conectando a MongoDB desde agencias...');
-    await mongoose.connect(finalUri);
-    isConnected = true;
-    console.log('✅ MongoDB conectado para agencias');
-  } catch (error) {
-    console.error('❌ Error conectando MongoDB en agencias:', error);
-    throw error;
-  }
-};
-
-// Esquema para agencias
-const agenciaSchema = new mongoose.Schema({
-  nombre: { type: String, required: true },
-  direccion: String,
-  telefono: String,
-  email: String,
-  gerente: String,
-  activa: { type: Boolean, default: true },
-  fechaCreacion: { type: Date, default: Date.now }
-}, { timestamps: true });
-
-const Agencia = mongoose.models.Agencia || mongoose.model('Agencia', agenciaSchema);
+import { connectDB, Agencia } from '../lib/mongodb.js';
 
 export default async function handler(req, res) {
   // CORS headers
@@ -48,17 +13,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('🏢 Agencias - Method:', req.method, 'Query:', req.query);
-    
-    // Conectar a MongoDB
     await connectDB();
-
     const { query, method, body } = req;
     const { id } = query;
 
+    console.log('🏢 Agencias - Method:', method, 'ID:', id);
+
     if (method === 'GET') {
       if (id) {
-        // Obtener agencia específica
         const agencia = await Agencia.findById(id);
         if (!agencia) {
           return res.status(404).json({ 
@@ -71,7 +33,6 @@ export default async function handler(req, res) {
           data: agencia
         });
       } else {
-        // Obtener lista de agencias
         const page = parseInt(query.page) || 1;
         const limit = parseInt(query.limit) || 10;
         const skip = (page - 1) * limit;
@@ -98,7 +59,6 @@ export default async function handler(req, res) {
     }
 
     if (method === 'POST') {
-      // Crear nueva agencia
       const nuevaAgencia = new Agencia(body);
       const agenciaGuardada = await nuevaAgencia.save();
       
@@ -112,7 +72,6 @@ export default async function handler(req, res) {
     }
 
     if (method === 'PUT' && id) {
-      // Actualizar agencia
       const agenciaActualizada = await Agencia.findByIdAndUpdate(
         id,
         body,
@@ -136,7 +95,6 @@ export default async function handler(req, res) {
     }
 
     if (method === 'DELETE' && id) {
-      // Marcar agencia como inactiva en lugar de eliminar
       const agenciaEliminada = await Agencia.findByIdAndUpdate(
         id,
         { activa: false },
@@ -158,18 +116,14 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(405).json({ 
-      success: false,
-      error: 'Método no permitido' 
-    });
+    return res.status(405).json({ error: 'Método no permitido' });
 
   } catch (error) {
     console.error('❌ Error en agencias:', error);
     return res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: error.message
     });
   }
 }

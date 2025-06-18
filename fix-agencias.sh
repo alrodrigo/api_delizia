@@ -1,3 +1,8 @@
+#!/bin/bash
+
+echo "🔧 Recreando agencias.js correctamente..."
+
+cat > api/agencias.js << 'EOF'
 // Endpoint para agencias - MongoDB
 import { connectDB, Agencia } from '../lib/mongodb.js';
 
@@ -127,3 +132,6 @@ export default async function handler(req, res) {
     });
   }
 }
+EOF
+
+echo "✅ Agencias.js recreado correctamente"

@@ -1,5 +1,5 @@
-// Endpoint para empleados con MongoDB real
-import { connectDB, Empleado } from '../../lib/mongodb.js';
+// Endpoint para observaciones con MongoDB real
+import { connectDB, Observacion } from '../../lib/mongodb.js';
 
 export default async function handler(req, res) {
   // CORS headers más completos
@@ -19,44 +19,47 @@ export default async function handler(req, res) {
     const { query, method, body } = req;
     const { id } = query;
 
-    console.log('Empleados MongoDB - Method:', method, 'ID:', id);
+    console.log('Observaciones MongoDB - Method:', method, 'ID:', id);
 
     if (method === 'GET') {
       if (id) {
-        // Obtener empleado específico
-        const empleado = await Empleado.findById(id);
-        if (!empleado) {
+        // Obtener observación específica
+        const observacion = await Observacion.findById(id);
+        if (!observacion) {
           return res.status(404).json({ 
             success: false, 
-            message: 'Empleado no encontrado' 
+            message: 'Observación no encontrada' 
           });
         }
         return res.json({
           success: true,
-          data: empleado
+          data: observacion
         });
       } else {
-        // Obtener lista de empleados
+        // Obtener lista de observaciones
         const page = parseInt(query.page) || 1;
         const limit = parseInt(query.limit) || 10;
         const skip = (page - 1) * limit;
 
         let filter = {};
-        if (query.agencia) {
-          filter['agencia._id'] = query.agencia;
+        if (query.empleado) {
+          filter['empleado._id'] = query.empleado;
+        }
+        if (query.tipo) {
+          filter.tipo = query.tipo;
         }
 
-        const empleados = await Empleado.find(filter)
-          .sort({ createdAt: -1 })
+        const observaciones = await Observacion.find(filter)
+          .sort({ fecha: -1 })
           .skip(skip)
           .limit(limit);
 
-        const total = await Empleado.countDocuments(filter);
+        const total = await Observacion.countDocuments(filter);
 
         return res.json({
           success: true,
-          count: empleados.length,
-          data: empleados,
+          count: observaciones.length,
+          data: observaciones,
           pagination: {
             currentPage: page,
             totalPages: Math.ceil(total / limit),
@@ -68,66 +71,66 @@ export default async function handler(req, res) {
     }
 
     if (method === 'POST') {
-      // Crear nuevo empleado
-      const nuevoEmpleado = new Empleado(body);
-      const empleadoGuardado = await nuevoEmpleado.save();
+      // Crear nueva observación
+      const nuevaObservacion = new Observacion(body);
+      const observacionGuardada = await nuevaObservacion.save();
       
-      console.log('✅ Empleado creado:', empleadoGuardado);
+      console.log('✅ Observación creada:', observacionGuardada);
       
       return res.status(201).json({
         success: true,
-        message: 'Empleado creado correctamente',
-        data: empleadoGuardado
+        message: 'Observación creada correctamente',
+        data: observacionGuardada
       });
     }
 
     if (method === 'PUT' && id) {
-      // Actualizar empleado
-      const empleadoActualizado = await Empleado.findByIdAndUpdate(
+      // Actualizar observación
+      const observacionActualizada = await Observacion.findByIdAndUpdate(
         id,
         body,
         { new: true, runValidators: true }
       );
 
-      if (!empleadoActualizado) {
+      if (!observacionActualizada) {
         return res.status(404).json({ 
           success: false, 
-          message: 'Empleado no encontrado' 
+          message: 'Observación no encontrada' 
         });
       }
 
-      console.log('✅ Empleado actualizado:', empleadoActualizado);
+      console.log('✅ Observación actualizada:', observacionActualizada);
 
       return res.json({
         success: true,
-        message: 'Empleado actualizado correctamente',
-        data: empleadoActualizado
+        message: 'Observación actualizada correctamente',
+        data: observacionActualizada
       });
     }
 
     if (method === 'DELETE' && id) {
-      // Eliminar empleado
-      const empleadoEliminado = await Empleado.findByIdAndDelete(id);
+      // Eliminar observación
+      const observacionEliminada = await Observacion.findByIdAndDelete(id);
 
-      if (!empleadoEliminado) {
+      if (!observacionEliminada) {
         return res.status(404).json({ 
           success: false, 
-          message: 'Empleado no encontrado' 
+          message: 'Observación no encontrada' 
         });
       }
 
-      console.log('✅ Empleado eliminado:', empleadoEliminado);
+      console.log('✅ Observación eliminada:', observacionEliminada);
 
       return res.json({
         success: true,
-        message: 'Empleado eliminado correctamente'
+        message: 'Observación eliminada correctamente'
       });
     }
 
     return res.status(405).json({ error: 'Método no permitido' });
 
   } catch (error) {
-    console.error('❌ Error en empleados MongoDB:', error);
+    console.error('❌ Error en observaciones MongoDB:', error);
     return res.status(500).json({
       success: false,
       message: 'Error interno del servidor',

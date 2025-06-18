@@ -2,6 +2,7 @@
 import { connectDB, Asistencia } from '../lib/mongodb.js';
 
 export default async function handler(req, res) {
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, Pragma');
@@ -12,7 +13,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Conectar a MongoDB
     await connectDB();
+
     const { query, method, body } = req;
     const { id } = query;
 
@@ -20,6 +23,7 @@ export default async function handler(req, res) {
 
     if (method === 'GET') {
       if (id) {
+        // Obtener asistencia específica
         const asistencia = await Asistencia.findById(id);
         if (!asistencia) {
           return res.status(404).json({ 
@@ -32,6 +36,7 @@ export default async function handler(req, res) {
           data: asistencia
         });
       } else {
+        // Obtener lista de asistencias
         const page = parseInt(query.page) || 1;
         const limit = parseInt(query.limit) || 10;
         const skip = (page - 1) * limit;
@@ -66,6 +71,7 @@ export default async function handler(req, res) {
     }
 
     if (method === 'POST') {
+      // Crear nueva asistencia
       const nuevaAsistencia = new Asistencia(body);
       const asistenciaGuardada = await nuevaAsistencia.save();
       
@@ -79,6 +85,7 @@ export default async function handler(req, res) {
     }
 
     if (method === 'PUT' && id) {
+      // Actualizar asistencia
       const asistenciaActualizada = await Asistencia.findByIdAndUpdate(
         id,
         body,
@@ -102,6 +109,7 @@ export default async function handler(req, res) {
     }
 
     if (method === 'DELETE' && id) {
+      // Eliminar asistencia
       const asistenciaEliminada = await Asistencia.findByIdAndDelete(id);
 
       if (!asistenciaEliminada) {

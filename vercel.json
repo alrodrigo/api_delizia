@@ -1,1 +1,24 @@
-{}
+{
+  "rewrites": [
+    {
+      "source": "/api/empleados/:path*",
+      "destination": "/api/universal"
+    },
+    {
+      "source": "/api/agencias/:path*", 
+      "destination": "/api/universal"
+    },
+    {
+      "source": "/api/asistencias/:path*",
+      "destination": "/api/universal"
+    },
+    {
+      "source": "/api/observaciones/:path*",
+      "destination": "/api/universal"
+    },
+    {
+      "source": "/api/desempenos/:path*",
+      "destination": "/api/universal"
+    }
+  ]
+}

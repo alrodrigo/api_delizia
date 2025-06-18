@@ -1,5 +1,42 @@
 // Endpoint para asistencias - MongoDB
-import { connectDB, Asistencia } from '../lib/mongodb.js';
+import mongoose from 'mongoose';
+
+// Configuración de conexión a MongoDB
+let isConnected = false;
+
+const connectDB = async () => {
+  if (isConnected) {
+    return;
+  }
+
+  try {
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/delizia';
+    const finalUri = mongoUri.includes('/delizia') ? mongoUri : mongoUri.replace('/?', '/delizia?');
+    
+    console.log('🔍 Conectando a MongoDB desde asistencias...');
+    await mongoose.connect(finalUri);
+    isConnected = true;
+    console.log('✅ MongoDB conectado para asistencias');
+  } catch (error) {
+    console.error('❌ Error conectando MongoDB en asistencias:', error);
+    throw error;
+  }
+};
+
+// Esquema simple para asistencias
+const asistenciaSchema = new mongoose.Schema({
+  empleado: {
+    _id: String, 
+    nombre: String
+  },
+  fecha: { type: Date, required: true },
+  horaEntrada: String,
+  horaSalida: String,
+  estado: { type: String, enum: ['presente', 'ausente', 'tardanza'], default: 'presente' },
+  observaciones: String
+}, { timestamps: true });
+
+const Asistencia = mongoose.models.Asistencia || mongoose.model('Asistencia', asistenciaSchema);
 
 export default async function handler(req, res) {
   // CORS headers
